@@ -1,21 +1,25 @@
 const liElement = document.querySelectorAll('li')
 const selectElement = document.querySelector('#selectCountry')
 
+function numberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function updateStats() {
     fetch('https://api.covid19api.com/summary')
         .then(res => res.json())
         .then(numbers => {
+            const countriesArr = numbers.Countries
 
             function updateGlobal() {
                 const globalStats = numbers.Global
                 const { TotalDeaths, TotalRecovered, TotalConfirmed, } = globalStats
-                liElement[0].innerHTML = `<span>${TotalDeaths}</span>`
-                liElement[1].innerHTML = `<span>${TotalConfirmed}</span>`
-                liElement[2].innerHTML = `<span>${TotalRecovered}</span>`
+                liElement[0].innerHTML = `<span>${numberWithCommas(TotalDeaths)}</span>`
+                liElement[1].innerHTML = `<span>${numberWithCommas(TotalConfirmed)}</span>`
+                liElement[2].innerHTML = `<span>${numberWithCommas(TotalRecovered)}</span>`
             }
             updateGlobal()
-                
-            const countriesArr = numbers.Countries
+
             for (country of countriesArr) {
                 const { Country, TotalDeaths, TotalRecovered, TotalConfirmed, Date, CountryCode } = country
 
@@ -23,13 +27,13 @@ function updateStats() {
 
                 selectElement.addEventListener('change', (event) => {
                     if (event.target.value === CountryCode) {
-                        liElement[0].innerHTML = `<span>${TotalDeaths}</span>`
-                        liElement[1].innerHTML = `<span>${TotalConfirmed}</span>`
-                        liElement[2].innerHTML = `<span>${TotalRecovered}</span>`
-                    }else if(event.target.value === 'global'){
+                        liElement[0].innerHTML = `<span>${numberWithCommas(TotalDeaths)}</span>`
+                        liElement[1].innerHTML = `<span>${numberWithCommas(TotalConfirmed)}</span>`
+                        liElement[2].innerHTML = `<span>${numberWithCommas(TotalRecovered)}</span>`
+                    } else if (event.target.value === 'global') {
                         updateGlobal()
                     }
-                    
+
                 })
             }
         })
