@@ -1,0 +1,39 @@
+@keyframes fadeIn{
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes zoom{
+    from{
+        transform:scale(0);
+    }
+}
+
+@keyframes slideFromBottom{
+    from{
+        transform: translateY(500px);
+    }
+}
+
+@keyframes slideFromTop{
+    from{
+        transform: translateY(-400px);
+    }
+}
+
+span,li{
+    animation: ease zoom 0.5s;
+}
+
+main{
+    animation: ease slideFromBottom 1s;
+}
+
+ul div h2{
+    animation: ease fadeIn 1s;
+}
+
+select{
+    animation: ease slideFromTop 1s;
+}
