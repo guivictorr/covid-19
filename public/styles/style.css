@@ -80,13 +80,17 @@ main{
 .text-box h1{
     font-size:52px;
     color: var(--primary-color);
-    margin-bottom: 16px;
 }
 
 .text-box p{
     font-size: 18px;
     color:var(--secondary-color);
     width: 80%;
+    margin-top: 32px;
+}
+.text-box span{
+    color:var(--primary-color);
+    font-weight: 700;
 }
 
 .img-box img{

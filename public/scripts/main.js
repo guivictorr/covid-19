@@ -1,5 +1,6 @@
 const liElement = document.querySelectorAll('li')
 const selectElement = document.querySelector('#selectCountry')
+const textBox = document.querySelector('.text-box')
 
 function numberWithCommas(number) {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -10,6 +11,16 @@ function updateStats() {
         .then(res => res.json())
         .then(numbers => {
             const countriesArr = numbers.Countries
+            
+            function formatDate(date){
+                const year = date.slice(0,4)
+                const month = date.slice(5,7)
+                const day = date.slice(8,10)
+                formatedDate = `${day}/${month}/${year}`
+
+                textBox.innerHTML += `<p>Última atualização: <span>${formatedDate}</span></p>`
+            }
+            formatDate(numbers.Date)
 
             function updateGlobal() {
                 const globalStats = numbers.Global
@@ -21,8 +32,8 @@ function updateStats() {
             updateGlobal()
 
             for (country of countriesArr) {
-                const { Country, TotalDeaths, TotalRecovered, TotalConfirmed, Date, CountryCode } = country
-
+                const { Country, TotalDeaths, TotalRecovered, TotalConfirmed,CountryCode } = country
+                
                 selectElement.innerHTML += `<option value="${CountryCode}">${Country}</option>`
 
                 selectElement.addEventListener('change', (event) => {
