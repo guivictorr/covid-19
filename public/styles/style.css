@@ -91,6 +91,7 @@ main{
 .text-box span{
     color:var(--primary-color);
     font-weight: 700;
+    animation: 2s fadeIn;
 }
 
 .img-box img{
