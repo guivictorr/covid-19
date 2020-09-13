@@ -1,52 +1,101 @@
-const liElement = document.querySelectorAll('li')
-const selectElement = document.querySelector('#selectCountry')
-const textBox = document.querySelector('.text-box')
+class Data {
+    constructor(){
+        this.liElement = document.querySelectorAll('li')
+        this.selectElement = document.querySelector('#selectCountry')
+        this.textBox = document.querySelector('.text-box')
+    }
 
-function numberWithCommas(number) {
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+    async run(){
+        await this.fillSelect()
+        await this.renderGlobalData()
+        this.selectAction()
+        this.getDate()
+    }
 
-function updateStats() {
-    fetch('https://api.covid19api.com/summary')
-        .then(res => res.json())
-        .then(numbers => {
-            const countriesArr = numbers.Countries
-            
-            function formatDate(date){
-                const year = date.slice(0,4)
-                const month = date.slice(5,7)
-                const day = date.slice(8,10)
-                formatedDate = `${day}/${month}/${year}`
+    async getData(){
+        const response = await fetch('https://api.covid19api.com/summary')
+        const data = await response.json()
 
-                textBox.innerHTML += `<p>Última atualização: <span>${formatedDate}</span></p>`
-            }
-            formatDate(numbers.Date)
+        return data
+    }
 
-            function updateGlobal() {
-                const globalStats = numbers.Global
-                const { TotalDeaths, TotalRecovered, TotalConfirmed, } = globalStats
-                liElement[0].innerHTML = `<span>${numberWithCommas(TotalDeaths)}</span>`
-                liElement[1].innerHTML = `<span>${numberWithCommas(TotalConfirmed)}</span>`
-                liElement[2].innerHTML = `<span>${numberWithCommas(TotalRecovered)}</span>`
-            }
-            updateGlobal()
+    async fillSelect(){
+        const data = await this.getData()
+        const countries = data.Countries
+        
+        countries.map(country => {
+            const {CountryCode, Country} = country
+            this.selectElement.innerHTML += `<option value="${CountryCode}">${Country}</option>`
+        })
+    }
 
-            for (country of countriesArr) {
-                const { Country, TotalDeaths, TotalRecovered, TotalConfirmed,CountryCode } = country
-                
-                selectElement.innerHTML += `<option value="${CountryCode}">${Country}</option>`
+    async selectAction(){
+        this.selectElement.addEventListener('change', event => {
+            const targetValue = event.target.value
 
-                selectElement.addEventListener('change', (event) => {
-                    if (event.target.value === CountryCode) {
-                        liElement[0].innerHTML = `<span>${numberWithCommas(TotalDeaths)}</span>`
-                        liElement[1].innerHTML = `<span>${numberWithCommas(TotalConfirmed)}</span>`
-                        liElement[2].innerHTML = `<span>${numberWithCommas(TotalRecovered)}</span>`
-                    } else if (event.target.value === 'global') {
-                        updateGlobal()
-                    }
-
-                })
+            if(targetValue !== 'global'){
+                this.renderCountryData(targetValue)
+            }else{
+                this.renderGlobalData()
             }
         })
+    }
+
+    async renderCountryData(value){
+        const data = await this.getData()
+        const countries = data.Countries
+
+        countries.map(country => {
+            const { CountryCode, TotalConfirmed, TotalDeaths, TotalRecovered } = country
+            if(CountryCode === value) this.renderValues(TotalDeaths, TotalConfirmed, TotalRecovered)
+        })
+    }
+
+    async renderGlobalData(){
+        const data = await this.getData()
+        const globalData = data.Global
+        const {TotalDeaths,TotalConfirmed,TotalRecovered} = globalData
+
+        this.renderValues(TotalDeaths,TotalConfirmed,TotalRecovered)
+    }
+
+    renderValues(totalDeaths,totalConfirmed,totalRecovered){
+        let recovered = this.numberWithCommas(totalRecovered)
+        let confirmed = this.numberWithCommas(totalConfirmed)
+        let deaths = this.numberWithCommas(totalDeaths)
+
+        this.liElement[1].innerHTML = `<span>${confirmed}</span>`
+        this.liElement[0].innerHTML = `<span>${recovered}</span>`
+        this.liElement[2].innerHTML = `<span>${deaths}</span>`
+    }
+
+    numberWithCommas(number){
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    renderDate(formatedDate){
+        this.textBox.innerHTML += `<p>Última atualização: <span>${formatedDate}</span></p>`
+    }
+
+    formatDate(date){   
+        const dateArr = date.split('T')[0].split('-')
+        const year = dateArr[0]
+        const month = dateArr[1]
+        const day = dateArr[2]
+
+        const formatedDate = `${day}/${month}/${year}`
+
+        return formatedDate
+    }
+
+    async getDate(){
+        const data = await this.getData()
+        const { Date } = data
+
+        const formatedDate = this.formatDate(Date)
+        this.renderDate(formatedDate)
+    }
 }
-updateStats()
+
+const data = new Data()
+data.run()
